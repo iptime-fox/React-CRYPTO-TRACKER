@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import {
   Switch,
   Route,
@@ -12,22 +12,51 @@ import Chart from './Chart';
 import Price from './Price';
 import { useQuery } from 'react-query';
 import { fetchCoinInfo, fetchCoinTickers } from '../api';
+import { useSetRecoilState } from 'recoil';
+import { isDarkAtom } from '../atom';
 
 const Container = styled.div`
   padding: 0px 20px;
-  max-width: 480px;
+  max-width: 400px;
   margin: 0 auto;
 `;
 
 const Header = styled.header`
   height: 15vh;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+`;
+
+const Home = styled.div`
+  width: 25px;
+  height: 25px;
+  font-size: 25px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 2rem;
+`;
+
+const Btn = styled.button`
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 1rem;
+  border-radius: 50%;
+  border: none;
+  background-color: ${(props) => props.theme.textColor};
 `;
 
 const Title = styled.h1`
-  font-size: 48px;
+  font-size: 36px;
   color: ${(props) => props.theme.accentColor};
 `;
 
@@ -42,6 +71,7 @@ const Overview = styled.div`
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 20px;
   border-radius: 10px;
+  margin-bottom: 1rem;
 `;
 const OverviewItem = styled.div`
   display: flex;
@@ -52,6 +82,9 @@ const OverviewItem = styled.div`
     font-weight: 400;
     text-transform: uppercase;
     margin-bottom: 5px;
+  }
+  span {
+    color: #fff;
   }
 `;
 const Description = styled.p`
@@ -145,6 +178,8 @@ interface PriceData {
 }
 
 function Coin() {
+  const setDarkAtom = useSetRecoilState(isDarkAtom);
+  const toggleDark = () => setDarkAtom((prev) => !prev);
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
   const priceMatch = useRouteMatch('/:coinId/price');
@@ -156,11 +191,23 @@ function Coin() {
   const { isLoading: tickersLoading, data: tickersData } = useQuery<PriceData>(
     ['tickers', coinId],
     () => fetchCoinTickers(coinId)
+    // {
+    //   refetchInterval: 5000,
+    // }
   );
 
   const loading = infoLoading || tickersLoading;
   return (
     <Container>
+      <Helmet>
+        <title>
+          {state?.name ? state.name : loading ? 'Loading...' : infoData?.name}
+        </title>
+      </Helmet>
+      <Home>
+        <Link to='/'>🏠</Link>
+      </Home>
+      <Btn onClick={toggleDark}>🌙</Btn>
       <Header>
         <Title>
           {state?.name ? state.name : loading ? 'Loading...' : infoData?.name}
@@ -181,10 +228,14 @@ function Coin() {
             </OverviewItem>
             <OverviewItem>
               <span>Price:</span>
-              <span>{tickersData?.quotes.USD.price.toFixed(3)}</span>
+              <span>${tickersData?.quotes.USD.price.toFixed(3)}</span>
             </OverviewItem>
           </Overview>
-          <Description>{infoData?.description}</Description>
+          <Overview>
+            <OverviewItem>
+              <Description>{infoData?.description}</Description>
+            </OverviewItem>
+          </Overview>
           <Overview>
             <OverviewItem>
               <span>Total Suply:</span>
@@ -207,7 +258,14 @@ function Coin() {
 
           <Switch>
             <Route path={`/:coinId/price`}>
-              <Price />
+              <Price
+                percent30m={tickersData?.quotes.USD.percent_change_30m}
+                percent1h={tickersData?.quotes.USD.percent_change_1h}
+                percent12h={tickersData?.quotes.USD.percent_change_12h}
+                percent7d={tickersData?.quotes.USD.percent_change_7d}
+                percent30d={tickersData?.quotes.USD.percent_change_30d}
+                percent1y={tickersData?.quotes.USD.percent_change_1y}
+              />
             </Route>
             <Route path={`/:coinId/chart`}>
               <Chart coinId={coinId} />
