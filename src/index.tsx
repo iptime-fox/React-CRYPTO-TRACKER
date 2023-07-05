@@ -15,9 +15,7 @@ root.render(
   <React.StrictMode>
     <RecoilRoot>
       <QueryClientProvider client={queryClient}>
-        {/* <ThemeProvider theme={darkTheme}> */}
         <App />
-        {/* </ThemeProvider> */}
       </QueryClientProvider>
     </RecoilRoot>
   </React.StrictMode>
