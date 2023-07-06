@@ -37,6 +37,7 @@ const Home = styled.div`
   align-items: center;
   justify-content: center;
   top: 2rem;
+  left: 1.5rem;
 `;
 
 const Btn = styled.button`
@@ -178,8 +179,8 @@ interface PriceData {
 }
 
 function Coin() {
-  const setDarkAtom = useSetRecoilState(isDarkAtom);
-  const toggleDark = () => setDarkAtom((prev) => !prev);
+  const isDark = useSetRecoilState(isDarkAtom);
+  const toggleDark = () => isDark((prev) => !prev);
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
   const priceMatch = useRouteMatch('/:coinId/price');
@@ -205,7 +206,7 @@ function Coin() {
         </title>
       </Helmet>
       <Home>
-        <Link to='/'>🏠</Link>
+        <Link to='/'>&larr;</Link>
       </Home>
       <Btn onClick={toggleDark}>🌙</Btn>
       <Header>
